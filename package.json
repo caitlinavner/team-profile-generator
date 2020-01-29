@@ -1,0 +1,31 @@
+{
+  "name": "team-generator",
+  "version": "1.0.0",
+  "description": "OOP and testing for week 10 homework",
+  "main": "app.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "jest --verbose test/*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caitlinavner/team-profile-generator.git"
+  },
+  "author": "Caitlin Avner",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/caitlinavner/team-profile-generator/issues"
+  },
+  "homepage": "https://github.com/caitlinavner/team-profile-generator#readme",
+  "dependencies": {
+    "inquirer": "^6.3.1",
+    "lib": "^4.0.5"
+  },
+  "devDependencies": {
+    "jest": "^24.8.0"
+  },
+  "keywords": []
+}
