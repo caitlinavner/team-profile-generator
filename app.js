@@ -1,177 +1,131 @@
 const inquirer = require("inquirer");
-const jest = require("jest");
 const fs = require("fs");
-const path = require("path");
-//const axios = require("axios");
-//const util = require("util");
-//const writeFileAsync = util.promisify(fs.writeFile);
-//var pdf = require("html-pdf");
-var options = {
-  format: "Letter"
-};
 
-//Module Imports
-const Employee = require("./lib/Employee.js");
-const Engineer = require("./lib/Engineer.js");
-const Intern = require("./lib/Intern.js");
-const Manager = require("./lib/Manager.js");
-const generateHTML = require("./output/generateHTML.js");
+const Manager = require("./lib/Manager");
+const Intern = require("./lib/Intern");
+const Engineer = require("./lib/Engineer");
 
-//Employees DATA
-const employees = [];
-const engineers = [];
-const interns = [];
-const managers = [];
-let id = 0;
-var response;
-
-const promptUser = () => {
-  inquirer
-    .prompt([
-      {
-        type: "input",
-        message: "Name:",
-        name: "name"
-      },
-      {
-        type: "input",
-        message: "Email:",
-        name: "email"
-      },
-      {
-        type: "list",
-        name: "role",
-        message: "What's Your Position At The Company?",
-        choices: ["Manager", "Engineer", "Intern"]
-      }
-    ])
-    .then(function(data) {
-      switch (data.role) {
-        case "Manager":
-          inquirer
-            .prompt([
-              {
-                type: "input",
-                message: "Enter employee ID: ",
-                name: "id"
-              },
-              {
-                type: "input",
-                message: "Enter office number: ",
-                name: "office"
-              }
-            ])
-            .then(function(res) {
-              const officeNum = res.office;
-              console.log(officeNum);
-              const manager = new Manager(
-                data.name,
-                res.id,
-                data.email,
-                officeNum,
-                "Manager"
-              );
-              console.log(manager);
-              employees.push(manager);
-            })
-            .then(function() {
-              addNext();
-            });
-          break;
-        case "Engineer":
-          inquirer
-            .prompt([
-              {
-                type: "input",
-                message: "Enter employee ID: ",
-                name: "id"
-              },
-              {
-                type: "input",
-                message: "Enter github username: ",
-                name: "github"
-              }
-            ])
-            .then(function(res) {
-              const githubName = res.github;
-              const engineer = new Engineer(
-                data.name,
-                res.id,
-                data.email,
-                githubName,
-                "Engineer"
-              );
-              employees.push(engineer);
-            })
-            .then(function() {
-              addNext();
-            });
-          break;
-        case "Intern":
-          inquirer
-            .prompt([
-              {
-                type: "input",
-                message: "Enter employee ID: ",
-                name: "id"
-              },
-              {
-                type: "input",
-                message: "Enter school: ",
-                name: "school"
-              }
-            ])
-            .then(function(res) {
-              const internSchool = res.school;
-              const intern = new Intern(
-                data.name,
-                res.id,
-                data.email,
-                internSchool,
-                "Intern"
-              );
-              employees.push(intern);
-            })
-            .then(function() {
-              addNext();
-            });
-          break;
-      }
+async function start() {
+  console.log("Create your Engineering Team!");
+  let teamHTML = "";
+  let teamSize;
+  await inquirer
+    .prompt({
+      type: "number",
+      message: "How many people are on your Engineering team?",
+      name: "numOfTeam"
     })
-    .then(function() {});
-};
-
-const addNext = () => {
-  inquirer
-    .prompt([
-      {
-        type: "list",
-        name: "add",
-        message: "Would You Like To Add Another Employee?",
-        choices: ["Yes", "No"]
-      }
-    ])
-    .then(function(res) {
-      if (res.add === "Yes") {
-        promptUser();
-      } else {
-        console.log("Done");
-        completedRoster(employees);
-      }
+    .then(data => {
+      teamSize = data.numOfTeam + 1;
     });
-};
+  if (teamSize === 0) {
+    console.log("You can't make a team without team members...");
+    return;
+  }
+  for (i = 1; i < teamSize; i++) {
+    let name;
+    let id;
+    let title;
+    let email;
+    await inquirer
+      .prompt([
+        {
+          type: "input",
+          message: `What is employee (${i})'s name?`,
+          name: "name"
+        },
+        {
+          type: "input",
+          message: `What is employee (${i})'s id?`,
+          name: "id"
+        },
+        {
+          type: "input",
+          message: `What is employee (${i})'s email?`,
+          name: "email"
+        },
+        {
+          type: "list",
+          message: `What employee (${i})'s role?`,
+          name: "title",
+          choices: ["Engineer", "Intern", "Manager"]
+        }
+      ])
+      .then(data => {
+        name = data.name;
+        id = data.id;
+        title = data.title;
+        email = data.email;
+      });
+    switch (title) {
+      case "Manager":
+        await inquirer
+          .prompt([
+            {
+              type: "input",
+              message: "What is the Manager's office number?",
+              name: "officeNo"
+            }
+          ])
+          .then(data => {
+            const manager = new Manager(name, id, email, data.officeNo);
 
-function completedRoster(employees) {
-  console.log("Success!");
-  console.log(employees);
-  const generateHTML = generateHTML(employees);
-  console.log(html);
-  writeFileAsync("./output/employees.html", html, "utf-8");
+            teamMember = fs.readFileSync("templates/manager.html");
+
+            teamHTML = teamHTML + "\n" + eval("`" + teamMember + "`");
+          });
+        break;
+
+      //INTERN
+
+      case "Intern":
+        await inquirer
+          .prompt([
+            {
+              type: "input",
+              message: "What school does your Intern attend?",
+              name: "school"
+            }
+          ])
+          .then(data => {
+            const intern = new Intern(name, id, email, data.school);
+            teamMember = fs.readFileSync("templates/intern.html");
+            teamHTML = teamHTML + "\n" + eval("`" + teamMember + "`");
+          });
+        break;
+
+      //ENGINEER
+
+      case "Engineer":
+        await inquirer
+          .prompt([
+            {
+              type: "input",
+              message: "What is your Engineer's GitHub?",
+              name: "github"
+            }
+          ])
+          .then(data => {
+            const engineer = new Engineer(name, id, email, data.github);
+            teamMember = fs.readFileSync("templates/engineer.html");
+            teamHTML = teamHTML + "\n" + eval("`" + teamMember + "`");
+          });
+        break;
+    } // switch case end
+  } // end of loop
+
+  const mainHTML = fs.readFileSync("templates/main.html");
+
+  teamHTML = eval("`" + mainHTML + "`");
+
+  // write file to new team.html file
+  fs.writeFile("output/team.html", teamHTML, function(err) {
+    if (err) {
+      return console.log(err);
+    }
+
+    console.log("Meet your team!");
+  });
 }
 
-function init() {
-  console.log("Please enter employee info");
-  promptUser();
-}
-
-init();
+start();
